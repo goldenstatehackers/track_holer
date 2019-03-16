@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "808056438691",
+    "firebase_url": "https://goldenstate-7d27b.firebaseio.com",
+    "project_id": "goldenstate-7d27b",
+    "storage_bucket": "goldenstate-7d27b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:808056438691:android:9abd27ea33ce4514",
+        "android_client_info": {
+          "package_name": "com.goldenstate.mapper_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "808056438691-tad70adgl8ompbc3nblsdc1fj1nsktq5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5Xcj-QsymGqRl6vna25FD9E4vLOZu0p4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
