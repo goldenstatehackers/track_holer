@@ -26,6 +26,8 @@ class FireMapState extends State<FireMap> {
   Firestore firestore = Firestore.instance;
   Geoflutterfire geo = Geoflutterfire();
 
+  Set<Marker> liked = new Set();
+
   @override
   Widget build(context) => Scaffold(
       appBar: AppBar(
@@ -57,22 +59,48 @@ class FireMapState extends State<FireMap> {
       ]));
 
   void _goToSaved() {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (BuildContext context) {
-      Iterable<ListTile> tiles = mapController.markers.map((Marker marker) {
-        return ListTile(title: Text(marker.id));
-      });
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (BuildContext context) {
+        var divided = ListTile.divideTiles(
+          context: context,
+          tiles: _buildTiles(),
+        ).toList();
 
-      return Scaffold(
-        appBar: AppBar(),
-        body: ListView(
-          children: ListTile.divideTiles(
-            context: context,
-            tiles: tiles,
-          ).toList(),
+        return Scaffold(
+          appBar: AppBar(),
+          body: new ListView(
+            children: divided,
+          ),
+        );
+      },
+    ));
+  }
+
+  Iterable<ListTile> _buildTiles() {
+    return mapController.markers.map((Marker marker) {
+      final title = marker.options.infoWindowText.title;
+      final coord = marker.options.infoWindowText.snippet;
+      final text = "$title: $coord";
+
+      final bool alreadyLiked = liked.contains(marker);
+
+      return ListTile(
+        title: Text(text),
+        trailing: Icon(
+          Icons.thumb_up,
+          color: alreadyLiked ? Colors.blue : null,
         ),
+        onTap: () {
+          setState(() {
+            if (alreadyLiked) {
+              liked.remove(marker);
+            } else {
+              liked.add(marker);
+            }
+          });
+        },
       );
-    }));
+    });
   }
 
   void _addMarker() {
@@ -86,20 +114,38 @@ class FireMapState extends State<FireMap> {
 
     mapController.addMarker(MarkerOptions(
         position: mapTarget,
-        icon: BitmapDescriptor.defaultMarker,
-        infoWindowText: InfoWindowText("Pot hole", position)));
+//        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+        infoWindowText: InfoWindowText("Crash", position)));
 
     GeoFirePoint point = geo.point(latitude: latitude, longitude: longitude);
 
-    firestore.collection('locations').add({
-      'position': point.data,
-      'name': 'Levski'
-    });
+    firestore
+        .collection('locations')
+        .add({'position': point.data, 'name': 'Pot hole'});
   }
 
   void _onMapCreated(GoogleMapController controller) {
     setState(() {
       mapController = controller;
+      firestore
+          .collection('locations')
+          .getDocuments()
+          .then((q) => q.documents.forEach(_addDoc));
     });
+  }
+
+  void _addDoc(DocumentSnapshot doc) {
+    final latitude = doc.data['position']['geopoint'].latitude;
+    final longitude = doc.data['position']['geopoint'].longitude;
+
+    final formattedLat = latitude.toStringAsFixed(2);
+    final formattedLon = longitude.toStringAsFixed(2);
+    final position = "Lat: $formattedLat, Lon: $formattedLon";
+
+    mapController.addMarker(MarkerOptions(
+        position: LatLng(latitude, longitude),
+        icon: BitmapDescriptor.defaultMarker,
+        infoWindowText: InfoWindowText("Pot hole", position)));
   }
 }
